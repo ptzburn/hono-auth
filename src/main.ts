@@ -1,9 +1,12 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
+import { auth } from "./lib/auth.ts";
 
-const app = new Hono()
+const app = new Hono();
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+app
+  .on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw))
+  .get("/", (c) => {
+    return c.text("Hello Hono!");
+  });
 
-Deno.serve(app.fetch)
+Deno.serve(app.fetch);
