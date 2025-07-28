@@ -1,11 +1,28 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
+  integer,
   pgTable,
   text,
   timestamp,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+
+export const posts = pgTable("posts", {
+  id: uuid().primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  title: varchar({ length: 500 }).notNull(),
+  content: text().notNull(),
+  tags: text("tags").array().default(sql`ARRAY[]::text[]`),
+  viewsCount: integer().default(0),
+  commentsCount: integer().default(0),
+  imageUrl: text("image_url"),
+  createdAt: timestamp({ withTimezone: true }).defaultNow(),
+  updatedAt: timestamp({ withTimezone: true }).defaultNow(),
+});
 
 export const todos = pgTable("todos", {
   id: uuid().primaryKey().defaultRandom(),
