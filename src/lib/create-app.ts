@@ -6,10 +6,12 @@ import faviconMiddleware from "../middlewares/favicon.middleware.ts";
 import { auth } from "./auth.ts";
 import notFound from "../middlewares/notFound.middleware.ts";
 import onError from "../middlewares/onError.middleware.ts";
+import defaultHook from "../utils/openapi/default-hook.ts";
 
 export function createRouter() {
   return new OpenAPIHono({
     strict: false,
+    defaultHook,
   });
 }
 

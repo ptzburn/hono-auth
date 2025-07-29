@@ -4,8 +4,8 @@ import { z, ZodError } from "zod";
 const EnvSchema = z.object({
   DENO_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(8000),
-  DATABASE_URL: z.string(),
-  BETTER_AUTH_URL: z.string(),
+  DATABASE_URL: z.url(),
+  BETTER_AUTH_URL: z.url(),
   BETTER_AUTH_SECRET: z.string(),
   MAILGUN_API_KEY: z.string(),
   MAILGUN_DOMAIN: z.string(),

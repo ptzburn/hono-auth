@@ -8,6 +8,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 
 export const posts = pgTable("posts", {
   id: uuid().primaryKey().defaultRandom(),
@@ -23,6 +24,8 @@ export const posts = pgTable("posts", {
   createdAt: timestamp({ withTimezone: true }).defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).defaultNow(),
 });
+
+export const selectPostsSchema = createSelectSchema(posts);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
