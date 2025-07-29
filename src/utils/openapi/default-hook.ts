@@ -6,7 +6,9 @@ const defaultHook: Hook<any, any, any, any> = (result, c) => {
     return c.json(
       {
         success: result.success,
-        error: result.error,
+        errors: result.error.issues.map((issue) => ({
+          [issue.path.join(".")]: issue.message,
+        })),
       },
       422,
     );

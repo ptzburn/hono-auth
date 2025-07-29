@@ -8,7 +8,8 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const posts = pgTable("posts", {
   id: uuid().primaryKey().defaultRandom(),
@@ -26,6 +27,20 @@ export const posts = pgTable("posts", {
 });
 
 export const selectPostsSchema = createSelectSchema(posts);
+
+export const insertPostsSchema = createInsertSchema(posts, {
+  title: (schema) =>
+    schema.min(5, "Title must be at least 5 characters long").max(500),
+  content: (schema) =>
+    schema.min(10, "Content must be at least 10 characters long"),
+}).omit({
+  id: true,
+  userId: true,
+  viewsCount: true,
+  commentsCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),

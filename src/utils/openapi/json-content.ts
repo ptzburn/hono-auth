@@ -1,6 +1,4 @@
-import type { z } from "@hono/zod-openapi";
-
-export type ZodSchema = z.ZodUnion | z.ZodObject | z.ZodArray<z.ZodObject>;
+import { ZodSchema } from "../../types.ts";
 
 const jsonContent = <
   T extends ZodSchema,

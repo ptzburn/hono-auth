@@ -3,6 +3,7 @@ import * as postsRoutes from "./posts.routes.ts";
 import * as postsHandlers from "./posts.handlers.ts";
 
 const posts = createRouter()
-  .openapi(postsRoutes.allPosts, postsHandlers.allPosts);
+  .openapi(postsRoutes.getAllPosts, postsHandlers.allPosts)
+  .openapi(postsRoutes.create, postsHandlers.createPost);
 
 export default posts;
