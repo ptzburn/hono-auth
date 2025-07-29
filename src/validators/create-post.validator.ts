@@ -1,15 +1,16 @@
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 
-export const createTodoSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-  completed: z.boolean().default(false),
+export const createPostSchema = z.object({
+  title: z.string().min(3, "Title is required"),
+  content: z.string().min(3, "Content is required"),
+  tags: z.array(z.string()).optional(),
+  imageUrl: z.string().optional(),
 }).strict();
 
-export const createTodoValidator = zValidator(
+export const createPostValidator = zValidator(
   "json",
-  createTodoSchema,
+  createPostSchema,
   (result, c) => {
     if (!result.success) {
       return c.json({
