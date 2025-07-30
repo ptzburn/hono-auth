@@ -1,4 +1,3 @@
-import "@std/dotenv/load";
 import { z, ZodError } from "zod";
 
 const EnvSchema = z.object({

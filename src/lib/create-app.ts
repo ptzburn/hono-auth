@@ -40,4 +40,10 @@ function createApp() {
   return app;
 }
 
+export function createTestApp(router: OpenAPIHono) {
+  const testApp = createApp();
+  testApp.route("/api", router);
+  return testApp;
+}
+
 export default createApp;
