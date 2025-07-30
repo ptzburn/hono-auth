@@ -9,7 +9,6 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
 
 export const posts = pgTable("posts", {
   id: uuid().primaryKey().defaultRandom(),
@@ -23,7 +22,9 @@ export const posts = pgTable("posts", {
   commentsCount: integer().default(0),
   imageUrl: text("image_url"),
   createdAt: timestamp({ withTimezone: true }).defaultNow(),
-  updatedAt: timestamp({ withTimezone: true }).defaultNow(),
+  updatedAt: timestamp({ withTimezone: true }).defaultNow().$onUpdate(() =>
+    new Date()
+  ),
 });
 
 export const selectPostsSchema = createSelectSchema(posts);
@@ -41,6 +42,8 @@ export const insertPostsSchema = createInsertSchema(posts, {
   createdAt: true,
   updatedAt: true,
 });
+
+export const updatePostsSchema = insertPostsSchema.partial();
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
