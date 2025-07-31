@@ -10,7 +10,7 @@ const onError: ErrorHandler = (error, c) => {
   const statusCode = currentStatus !== 200
     ? (currentStatus as ContentfulStatusCode)
     : 500;
-  const environment = c.env.DENO_ENV || env.DENO_ENV;
+  const environment = c.env.ENV || env.ENV;
 
   if (error instanceof HTTPException) {
     // deno-lint-ignore no-console

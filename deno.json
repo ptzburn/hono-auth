@@ -18,15 +18,15 @@
     "zod": "npm:zod@^4.0.10"
   },
   "tasks": {
-    "start": "deno run --allow-net ./src/app-run.ts",
-    "dev": "deno run --allow-net --allow-env --allow-read --env-file --watch ./src/app-run.ts",
+    "start": "deno serve --allow-net --allow-env --allow-read --env-file ./src/app.ts",
+    "dev": "deno serve --port 8000 --allow-net --allow-env --allow-read --env-file --watch ./src/app.ts",
     "lint": "deno lint .",
     "lint:fix": "deno task lint --fix",
     "typecheck": "deno check ./src/**/*.ts",
     "db:generate:migration": "deno -A --node-modules-dir npm:drizzle-kit generate",
     "db:migrate": "deno -A --node-modules-dir npm:drizzle-kit migrate",
     "db:studio": "deno -A --node-modules-dir npm:drizzle-kit studio",
-    "deploy": "deployctl deploy --project=blog-api --entrypoint=src/app-run.ts"
+    "deploy": "deployctl deploy --project=ptzburn-blog-api --entrypoint=src/app-run.ts"
   },
   "lint": {
     "include": [
@@ -44,5 +44,13 @@
   "compilerOptions": {
     "jsx": "precompile",
     "jsxImportSource": "hono/jsx"
+  },
+  "deploy": {
+    "project": "a5a9eb3d-7d78-4afa-b936-29f16bb46c2f",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "src/app-run.ts"
   }
 }

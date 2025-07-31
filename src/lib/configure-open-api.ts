@@ -13,11 +13,14 @@ export default function configureOpenApi(app: OpenAPIHono) {
   app.get(
     "/reference",
     Scalar({
-      url: "/doc",
       pageTitle: "Blog API Documentation",
       theme: "deepSpace",
       layout: "classic",
       defaultHttpClient: { targetKey: "js", clientKey: "fetch" },
+      sources: [
+        { url: "/doc", title: "API" },
+        { url: "/api/auth/open-api/generate-schema", title: "Authentication" },
+      ],
     }),
   );
 }
