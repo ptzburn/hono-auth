@@ -15,7 +15,7 @@ export function createRouter() {
   });
 }
 
-function createApp() {
+export default function createApp() {
   const app = createRouter();
 
   app
@@ -24,7 +24,7 @@ function createApp() {
     .use(
       "/api/auth/*",
       cors({
-        origin: "http://localhost:8000",
+        origin: "http://localhost:8000", // for frontend later
         allowHeaders: ["Content-Type", "Authorization"],
         allowMethods: ["POST", "GET", "OPTIONS"],
         exposeHeaders: ["Content-Length"],
@@ -39,11 +39,3 @@ function createApp() {
 
   return app;
 }
-
-export function createTestApp(router: OpenAPIHono) {
-  const testApp = createApp();
-  testApp.route("/api", router);
-  return testApp;
-}
-
-export default createApp;

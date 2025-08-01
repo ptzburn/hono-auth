@@ -8,21 +8,21 @@ const router = createRouter()
     createRoute({
       tags: ["Main"],
       method: "get",
-      path: "/",
+      path: "/health",
       responses: {
         200: jsonContent(
           z.object({
             success: z.boolean(),
             message: z.string(),
           }),
-          "Blog API Main",
+          "Health Check",
         ),
       },
     }),
     (c) => {
       return c.json({
         success: true,
-        message: "Blog API",
+        message: "OK",
       });
     },
   );
