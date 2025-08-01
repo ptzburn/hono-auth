@@ -3,6 +3,7 @@ import { openAPI } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db/db.ts";
 import { sendEmail } from "./email.ts";
+import env from "../env.ts";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -10,10 +11,10 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: env.ENV !== "test",
   },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: env.ENV !== "test",
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
@@ -23,6 +24,6 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    openAPI(),
+    openAPI({ disableDefaultReference: true }),
   ],
 });

@@ -1,6 +1,6 @@
 import { db } from "./db.ts";
 import { NewPost, PostUpdate } from "../types.ts";
-import { posts, updatePostsSchema } from "./schema.ts";
+import { posts } from "./schema.ts";
 import { desc, eq } from "drizzle-orm";
 
 export const getAllPosts = async () => {
