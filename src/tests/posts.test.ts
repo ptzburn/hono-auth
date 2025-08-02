@@ -7,84 +7,46 @@ import { posts as dbPosts, user } from "../db/schema.ts";
 import createApp from "../lib/create-app.ts";
 import env from "../env.ts";
 import { db } from "../db/db.ts";
-import { getCookie, getRandomPost, signUp } from "./helpers/postHelper.ts";
+import {
+  getFirstPost,
+  initialPosts,
+  signUpAndGetCookie,
+} from "./helpers/postHelper.ts";
 
 if (env.ENV !== "test") {
   throw new Error("ENV must be 'test'");
 }
 
-const client = testClient(createApp().route("/api", posts), {
-  init: {
-    credentials: "include",
-  },
+const client = testClient(createApp().route("/api", posts));
+let cookie: string;
+
+beforeAll(async () => {
+  cookie = await signUpAndGetCookie();
+
+  for (const post of initialPosts) {
+    await client.api.posts.$post({
+      json: post,
+    }, { headers: { Cookie: cookie } });
+  }
 });
 
-describe("posts routes", () => {
-  beforeAll(async () => {
-    await signUp();
-  });
+afterAll(async () => {
+  await db.delete(dbPosts);
+  await db.delete(user);
+});
 
-  afterAll(async () => {
-    await db.delete(dbPosts);
-    await db.delete(user);
-  });
-
-  it("POST /api/posts validates the body when authorized", async () => {
-    const cookie = await getCookie();
-
-    const response = await client.api.posts.$post({
-      // @ts-expect-error: testing failure
-      json: {
-        content: "This test fails",
-      },
-    }, {
-      headers: {
-        Cookie: cookie,
-      },
-    });
-    expect(response.status).toBe(422);
-    if (response.status === 422) {
-      const json = await response.json();
-
-      expect(Object.keys(json.errors[0])[0]).toBe("title");
-      expect(Object.values(json.errors[0])[0]).toBe(
-        "Invalid input: expected string, received undefined",
-      );
-    }
-  });
-
-  it("POST /api/posts creates a post when authorized", async () => {
-    const cookie = await getCookie();
-
-    const response = await client.api.posts.$post({
-      json: {
-        title: "Awful testing experience",
-        content: "This is a test post",
-      },
-    }, {
-      headers: {
-        Cookie: cookie,
-      },
-    });
-    expect(response.status).toBe(201);
-    if (response.status === 201) {
-      const json = await response.json();
-      expect(json.title).toBe("Awful testing experience");
-      expect(json.content).toBe("This is a test post");
-    }
-  });
-
-  it("GET /api/posts lists all posts", async () => {
+describe("GET request to", () => {
+  it("/api/posts returns all posts", async () => {
     const response = await client.api.posts.$get();
     expect(response.status).toBe(200);
     if (response.status === 200) {
       const result = await response.json();
       expect(Array.isArray(result)).toBe(true);
-      expect(result.length).toBe(1);
+      expect(result.length).toBe(3);
     }
   });
 
-  it("GET /api/posts/{id} validates the id param", async () => {
+  it("/api/posts/{id} validates the id param", async () => {
     const response = await client.api.posts[":id"].$get({
       param: {
         id: "id",
@@ -99,7 +61,7 @@ describe("posts routes", () => {
     }
   });
 
-  it("GET /api/posts/{id} returns 404 when post not found", async () => {
+  it("/api/posts/{id} returns 404 when post not found", async () => {
     const response = await client.api.posts[":id"].$get({
       param: {
         id: crypto.randomUUID(),
@@ -112,8 +74,8 @@ describe("posts routes", () => {
     }
   });
 
-  it("GET /api/posts/{id} gets a single post", async () => {
-    const post = await getRandomPost();
+  it("/api/posts/{id} gets a single post", async () => {
+    const post = await getFirstPost();
     const response = await client.api.posts[":id"].$get({
       param: {
         //@ts-ignore: no null
@@ -123,14 +85,15 @@ describe("posts routes", () => {
     expect(response.status).toBe(200);
     if (response.status === 200) {
       const json = await response.json();
-      expect(json.title).toBe("Awful testing experience");
-      expect(json.content).toBe("This is a test post");
+      expect(json.title).toBe("Test Post 1");
+      expect(json.content).toBe("Test Content 1");
     }
   });
+});
 
-  it("PATCH /api/posts/{id} validates the body when authorized", async () => {
-    const cookie = await getCookie();
-    const post = await getRandomPost();
+describe("When authorized, PATCH request to", () => {
+  it("/api/posts/{id} validates the body", async () => {
+    const post = await getFirstPost();
     const response = await client.api.posts[":id"].$patch({
       param: {
         //@ts-ignore: not null
@@ -155,9 +118,7 @@ describe("posts routes", () => {
     }
   });
 
-  it("PATCH /api/posts/{id} validates the id param when authorized", async () => {
-    const cookie = await getCookie();
-
+  it("/api/posts/{id} validates the id param", async () => {
     const response = await client.api.posts[":id"].$patch({
       param: {
         id: "wat",
@@ -176,17 +137,66 @@ describe("posts routes", () => {
       expect(Object.values(json.errors[0])[0]).toBe("Invalid UUID");
     }
   });
+});
 
-  /*it("PATCH /api/posts/{id} validates empty body when authorized", async () => {
-    const cookie = await getCookie();
-    const post = await getRandomPost();
+it("/api/posts/{id} validates empty body", async () => {
+  const post = await getFirstPost();
 
-    const response = await client.api.posts[":id"].$patch({
-      param: {
-        //@ts-ignore: not undefined
-        id: post.id,
+  const response = await client.api.posts[":id"].$patch({
+    param: {
+      //@ts-ignore: not undefined
+      id: post.id,
+    },
+    json: {},
+  }, {
+    headers: {
+      Cookie: cookie,
+    },
+  });
+  expect(response.status).toBe(422);
+  if (response.status === 422) {
+    const json = await response.json();
+
+    expect(Object.keys(json.errors[0])[0]).toBe("message");
+    expect(Object.values(json.errors[0])[0]).toBe("No updates provided");
+  }
+});
+
+it("/api/posts/{id} updates a single property of a post", async () => {
+  const post = await getFirstPost();
+
+  const response = await client.api.posts[":id"].$patch({
+    param: {
+      //@ts-ignore: not undefined
+      id: post.id,
+    },
+    json: {
+      content: "Changed Content",
+    },
+  }, {
+    headers: {
+      Cookie: cookie,
+    },
+  });
+  expect(response.status).toBe(200);
+  if (response.status === 200) {
+    const json = await response.json();
+
+    //@ts-ignore: post is defined
+    expect(json.title).toBe(post.title);
+    //@ts-ignore: post is defined
+    expect(json.content).not.toBe(post.content);
+    expect(json.content).toBe("Changed Content");
+  }
+});
+
+describe("When authorized, POST request to", () => {
+  it("/api/posts validates the body", async () => {
+    const response = await client.api.posts.$post({
+      // @ts-expect-error: testing failure
+      json: {
+        content: "This test fails",
       },
-      json: {},
     }, {
       headers: {
         Cookie: cookie,
@@ -195,44 +205,36 @@ describe("posts routes", () => {
     expect(response.status).toBe(422);
     if (response.status === 422) {
       const json = await response.json();
-      console.log(json.errors);
-      expect(Object.keys(json.errors[0])[0]).toBe("id");
-      expect(Object.values(json.errors[0])[0]).toBe("Invalid UUID");
+
+      expect(Object.keys(json.errors[0])[0]).toBe("title");
+      expect(Object.values(json.errors[0])[0]).toBe(
+        "Invalid input: expected string, received undefined",
+      );
     }
-  });*/
+  });
 
-  it("PATCH /api/posts/{id} updates a single property of a post when authorized", async () => {
-    const cookie = await getCookie();
-    const post = await getRandomPost();
-
-    const response = await client.api.posts[":id"].$patch({
-      param: {
-        //@ts-ignore: not undefined
-        id: post.id,
-      },
+  it("/api/posts creates a post", async () => {
+    const response = await client.api.posts.$post({
       json: {
-        content: "I changed the content",
+        title: "New Test Post",
+        content: "New Content",
       },
     }, {
       headers: {
         Cookie: cookie,
       },
     });
-    expect(response.status).toBe(200);
-    if (response.status === 200) {
+    expect(response.status).toBe(201);
+    if (response.status === 201) {
       const json = await response.json();
-
-      //@ts-ignore: post is defined
-      expect(json.title).toBe(post.title);
-      //@ts-ignore: post is defined
-      expect(json.content).not.toBe(post.content);
-      expect(json.content).toBe("I changed the content");
+      expect(json.title).toBe("New Test Post");
+      expect(json.content).toBe("New Content");
     }
   });
+});
 
-  it("DELETE /api/posts/{id} validates the id when authorized", async () => {
-    const cookie = await getCookie();
-
+describe("When authorized, DELETE request to", () => {
+  it("/api/posts/{id} validates the id", async () => {
     const response = await client.api.posts[":id"].$delete({
       param: {
         id: "wat",
@@ -251,9 +253,8 @@ describe("posts routes", () => {
     }
   });
 
-  it("DELETE /api/posts/{id} removes a post", async () => {
-    const cookie = await getCookie();
-    const post = await getRandomPost();
+  it("/api/posts/{id} removes a post", async () => {
+    const post = await getFirstPost();
 
     const response = await client.api.posts[":id"].$delete({
       param: {

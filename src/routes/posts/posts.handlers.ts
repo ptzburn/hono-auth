@@ -46,6 +46,20 @@ export const update: RouteHandler<UpdateRoute> = async (c) => {
   const { id } = c.req.valid("param");
   const updates = c.req.valid("json");
 
+  if (Object.keys(updates).length === 0) {
+    return c.json(
+      {
+        success: false,
+        errors: [
+          {
+            message: "No updates provided",
+          },
+        ],
+      },
+      422,
+    );
+  }
+
   const updatedPost = await updatePost(updates, id);
 
   if (!updatedPost) {
