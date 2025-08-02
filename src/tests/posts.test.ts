@@ -91,8 +91,8 @@ describe("GET request to", () => {
   });
 });
 
-describe("When authorized, PATCH request to", () => {
-  it("/api/posts/{id} validates the body", async () => {
+describe("PATCH request to", () => {
+  it("/api/posts/{id} validates the body when authorized", async () => {
     const post = await getFirstPost();
     const response = await client.api.posts[":id"].$patch({
       param: {
@@ -118,10 +118,10 @@ describe("When authorized, PATCH request to", () => {
     }
   });
 
-  it("/api/posts/{id} validates the id param", async () => {
+  it("/api/posts/{id} validates the id param when authorized", async () => {
     const response = await client.api.posts[":id"].$patch({
       param: {
-        id: "wat",
+        id: "id",
       },
       json: {},
     }, {
@@ -139,7 +139,7 @@ describe("When authorized, PATCH request to", () => {
   });
 });
 
-it("/api/posts/{id} validates empty body", async () => {
+it("/api/posts/{id} validates empty body when authorized", async () => {
   const post = await getFirstPost();
 
   const response = await client.api.posts[":id"].$patch({
@@ -162,7 +162,7 @@ it("/api/posts/{id} validates empty body", async () => {
   }
 });
 
-it("/api/posts/{id} updates a single property of a post", async () => {
+it("/api/posts/{id} updates a single property of a post when authorized", async () => {
   const post = await getFirstPost();
 
   const response = await client.api.posts[":id"].$patch({
@@ -190,8 +190,24 @@ it("/api/posts/{id} updates a single property of a post", async () => {
   }
 });
 
-describe("When authorized, POST request to", () => {
-  it("/api/posts validates the body", async () => {
+it("/api/posts/{id} returns Unauthorized when not authorized", async () => {
+  const response = await client.api.posts[":id"].$patch({
+    param: {
+      id: "id",
+    },
+    json: {},
+  });
+  expect(response.status).toBe(401);
+  if (response.status === 401) {
+    const json = await response.json();
+
+    expect(json.success).toBe(false);
+    expect(json.errors).toBe("Unauthorized");
+  }
+});
+
+describe("POST request to", () => {
+  it("/api/posts validates the body when authorized", async () => {
     const response = await client.api.posts.$post({
       // @ts-expect-error: testing failure
       json: {
@@ -213,7 +229,23 @@ describe("When authorized, POST request to", () => {
     }
   });
 
-  it("/api/posts creates a post", async () => {
+  it("/api/posts returns Unauthorized when not authorized", async () => {
+    const response = await client.api.posts.$post({
+      json: {
+        title: "New Test Post",
+        content: "New Content",
+      },
+    });
+    expect(response.status).toBe(401);
+    if (response.status === 401) {
+      const json = await response.json();
+
+      expect(json.success).toBe(false);
+      expect(json.errors).toBe("Unauthorized");
+    }
+  });
+
+  it("/api/posts creates a post when authorized", async () => {
     const response = await client.api.posts.$post({
       json: {
         title: "New Test Post",
@@ -233,11 +265,11 @@ describe("When authorized, POST request to", () => {
   });
 });
 
-describe("When authorized, DELETE request to", () => {
-  it("/api/posts/{id} validates the id", async () => {
+describe("DELETE request to", () => {
+  it("/api/posts/{id} validates the id when authorized", async () => {
     const response = await client.api.posts[":id"].$delete({
       param: {
-        id: "wat",
+        id: "id",
       },
     }, {
       headers: {
@@ -253,7 +285,25 @@ describe("When authorized, DELETE request to", () => {
     }
   });
 
-  it("/api/posts/{id} removes a post", async () => {
+  it("/api/posts/{id} returns Unauthorized when not authorized", async () => {
+    const post = await getFirstPost();
+
+    const response = await client.api.posts[":id"].$delete({
+      param: {
+        //@ts-ignore: post is defined
+        id: post.id,
+      },
+    });
+    expect(response.status).toBe(401);
+    if (response.status === 401) {
+      const json = await response.json();
+
+      expect(json.success).toBe(false);
+      expect(json.errors).toBe("Unauthorized");
+    }
+  });
+
+  it("/api/posts/{id} removes a post when authorized", async () => {
     const post = await getFirstPost();
 
     const response = await client.api.posts[":id"].$delete({

@@ -26,8 +26,7 @@ export async function sendEmail({ to, subject, text }: EmailParams) {
   };
 
   try {
-    const data = await mg.messages.create(mailgunDomain, messageData);
-    console.log(data);
+    await mg.messages.create(mailgunDomain, messageData);
   } catch (error) {
     console.error(error);
   }
