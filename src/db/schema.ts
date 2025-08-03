@@ -3,6 +3,7 @@ import {
   boolean,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uuid,
@@ -19,6 +20,7 @@ export const posts = pgTable("posts", {
   title: varchar({ length: 500 }).notNull(),
   content: text().notNull(),
   tags: text("tags").array().notNull().default(sql`ARRAY[]::text[]`),
+  likes: integer().notNull().default(0),
   viewsCount: integer().notNull().default(0),
   commentsCount: integer().notNull().default(0),
   imageUrl: text("image_url"),
@@ -45,6 +47,12 @@ export const selectPostsSchema = createSelectSchema(posts, {
     schema.describe("The tags of the post").openapi({
       example: ["documentation", "API", "TypeScript"],
     }),
+  likes: (schema) =>
+    schema.min(0).max(9999).describe("The amount of likes of the post").openapi(
+      {
+        example: 1,
+      },
+    ),
   viewsCount: (schema) =>
     schema.min(0).max(9999).describe("The number of views under the post")
       .openapi({
@@ -86,6 +94,7 @@ export const insertPostsSchema = createInsertSchema(posts, {
 }).omit({
   id: true,
   userId: true,
+  likes: true,
   viewsCount: true,
   commentsCount: true,
   createdAt: true,
@@ -93,6 +102,45 @@ export const insertPostsSchema = createInsertSchema(posts, {
 });
 
 export const updatePostsSchema = insertPostsSchema.partial();
+
+export const comments = pgTable(
+  "comments",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    postId: uuid("post_id").notNull().references(() => posts.id, {
+      onDelete: "cascade",
+    }),
+    content: text().notNull(),
+    likes: integer().notNull().default(0),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
+      .$onUpdate(
+        () => new Date(),
+      ),
+  },
+  (
+    table,
+  ) => [primaryKey({ columns: [table.userId, table.postId, table.createdAt] })],
+);
+
+export const selectCommentsSchema = createSelectSchema(comments);
+
+export const insertCommentsSchema = createInsertSchema(comments, {
+  content: (schema) =>
+    schema.min(1, "Comment must be at least 1 character long").describe(
+      "A comment under the post",
+    ).max(500, "Comment is too long. Maximum length is 500 ").openapi({
+      example: "I like it!",
+    }),
+}).omit({
+  postId: true,
+  userId: true,
+  likes: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),

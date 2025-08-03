@@ -28,6 +28,7 @@ export async function sendEmail({ to, subject, text }: EmailParams) {
   try {
     await mg.messages.create(mailgunDomain, messageData);
   } catch (error) {
+    // deno-lint-ignore no-console
     console.error(error);
   }
 }

@@ -1,6 +1,6 @@
 import { db } from "./db.ts";
-import { NewPost, PostUpdate } from "../types.ts";
-import { posts } from "./schema.ts";
+import { NewComment, NewPost, PostUpdate } from "../types.ts";
+import { comments, posts } from "./schema.ts";
 import { arrayContains, desc, eq, sql } from "drizzle-orm";
 
 export const getAllPosts = async () => {
@@ -52,6 +52,14 @@ export const deletePost = async (
   id: typeof posts.$inferSelect.id,
 ) => {
   const result = await db.delete(posts).where(eq(posts.id, id)).returning();
+
+  return result;
+};
+
+export const addComment = async (
+  comment: NewComment,
+) => {
+  const [result] = await db.insert(comments).values(comment).returning();
 
   return result;
 };
