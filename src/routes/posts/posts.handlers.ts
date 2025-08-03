@@ -2,6 +2,7 @@ import { RouteHandler } from "@hono/zod-openapi";
 import {
   CreateRoute,
   DeleteRoute,
+  GetByTag,
   GetOneRoute,
   PostsRoute,
   UpdateRoute,
@@ -11,6 +12,7 @@ import {
   deletePost,
   getAllPosts,
   getOnePost,
+  postsWithTag,
   updatePost,
 } from "../../db/queries.ts";
 
@@ -40,6 +42,17 @@ export const getOne: RouteHandler<GetOneRoute> = async (c) => {
   }
 
   return c.json(post, 200);
+};
+
+export const getByTag: RouteHandler<GetByTag> = async (c) => {
+  const { tagName } = c.req.valid("param");
+  const taggedPosts = await postsWithTag(tagName);
+
+  if (taggedPosts.length === 0) {
+    return c.json({ success: false, message: "Not Found" }, 404);
+  }
+
+  return c.json(taggedPosts, 200);
 };
 
 export const update: RouteHandler<UpdateRoute> = async (c) => {

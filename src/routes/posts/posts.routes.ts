@@ -11,6 +11,7 @@ import createErrorSchema from "../../utils/openapi/create-error-schema.ts";
 import { authMiddleware } from "../../middlewares/auth.middleware.ts";
 import unauthorizedErrorSchema from "../../utils/openapi/unauthorized-schema.ts";
 import IdParamsSchema from "../../utils/openapi/id-params-schema.ts";
+import TagParamsSchema from "../../utils/openapi/tag-params-schema.ts";
 
 export const getAllPosts = createRoute({
   tags: ["Posts"],
@@ -60,6 +61,27 @@ export const getOne = createRoute({
     422: jsonContent(
       createErrorSchema(insertPostsSchema),
       "Invalid id error",
+    ),
+    404: jsonContent(
+      z.object({ success: z.boolean(), message: z.string() }).openapi({
+        example: { success: false, message: "Not Found" },
+      }),
+      "Post not found",
+    ),
+  },
+});
+
+export const getByTag = createRoute({
+  tags: ["Posts"],
+  method: "get",
+  path: "/posts/tags/{tagName}",
+  request: {
+    params: TagParamsSchema,
+  },
+  responses: {
+    200: jsonContent(
+      z.array(selectPostsSchema),
+      "List of all posts tagged with the selected tag",
     ),
     404: jsonContent(
       z.object({ success: z.boolean(), message: z.string() }).openapi({
@@ -129,5 +151,6 @@ export const remove = createRoute({
 export type PostsRoute = typeof getAllPosts;
 export type CreateRoute = typeof create;
 export type GetOneRoute = typeof getOne;
+export type GetByTag = typeof getByTag;
 export type UpdateRoute = typeof update;
 export type DeleteRoute = typeof remove;

@@ -90,6 +90,35 @@ describe("GET request to", () => {
       expect(json.content).toBe("Test Content 1");
     }
   });
+
+  it("/api/posts/tags/{tagName} returns 404 when no posts with the tag were found", async () => {
+    const response = await client.api.posts.tags[":tagName"].$get({
+      param: {
+        tagName: "not found",
+      },
+    });
+    expect(response.status).toBe(404);
+    if (response.status === 404) {
+      const json = await response.json();
+      expect(json.message).toBe("Not Found");
+    }
+  });
+
+  it("/api/posts/tags/{tagName} returns all tagged posts", async () => {
+    const response = await client.api.posts.tags[":tagName"].$get({
+      param: {
+        //@ts-ignore: no null
+        tagName: "deno",
+      },
+    });
+    expect(response.status).toBe(200);
+    if (response.status === 200) {
+      const array = await response.json();
+      expect(array.length).toBe(1);
+      expect(array[0].title).toBe("Test Post 2");
+      expect(array[0].content).toBe("Test Content 2");
+    }
+  });
 });
 
 describe("PATCH request to", () => {

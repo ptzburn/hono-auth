@@ -7,6 +7,7 @@ const posts = createRouter()
   .openapi(postsRoutes.getAllPosts, postsHandlers.allPosts)
   .openapi(postsRoutes.create, postsHandlers.createPost)
   .openapi(postsRoutes.getOne, postsHandlers.getOne)
+  .openapi(postsRoutes.getByTag, postsHandlers.getByTag)
   .openapi(postsRoutes.update, postsHandlers.update)
   .openapi(postsRoutes.remove, postsHandlers.remove);
 

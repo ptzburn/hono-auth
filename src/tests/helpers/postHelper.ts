@@ -27,9 +27,17 @@ export async function getCookie() {
 }
 
 export const initialPosts = [
-  { title: "Test Post 1", content: "Test Content 1" },
-  { title: "Test Post 2", content: "Test Content 2" },
-  { title: "Test Post 3", content: "Test Content 3" },
+  {
+    title: "Test Post 1",
+    content: "Test Content 1",
+    tags: ["test", "example"],
+  },
+  {
+    title: "Test Post 2",
+    content: "Test Content 2",
+    tags: ["testing", "deno"],
+  },
+  { title: "Test Post 3", content: "Test Content 3", tags: ["hello", "world"] },
 ];
 
 export async function getFirstPost() {

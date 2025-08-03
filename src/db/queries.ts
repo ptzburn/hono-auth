@@ -1,7 +1,7 @@
 import { db } from "./db.ts";
 import { NewPost, PostUpdate } from "../types.ts";
 import { posts } from "./schema.ts";
-import { desc, eq, sql } from "drizzle-orm";
+import { arrayContains, desc, eq, sql } from "drizzle-orm";
 
 export const getAllPosts = async () => {
   const returnedPosts = await db
@@ -26,6 +26,16 @@ export const getOnePost = async (id: typeof posts.$inferSelect.id) => {
   });
 
   return post;
+};
+
+export const postsWithTag = async (tagName: string) => {
+  const taggedPosts = await db
+    .select()
+    .from(posts)
+    .where(arrayContains(posts.tags, [tagName]))
+    .orderBy(desc(posts.createdAt));
+
+  return taggedPosts;
 };
 
 export const updatePost = async (
