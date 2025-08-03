@@ -1,5 +1,5 @@
 import { createRoute } from "@hono/zod-openapi";
-import { z } from "zod";
+import { z } from "@hono/zod-openapi";
 import jsonContent from "../../utils/openapi/json-content.ts";
 import {
   insertPostsSchema,

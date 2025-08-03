@@ -9,6 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "@hono/zod-openapi";
 
 export const posts = pgTable("posts", {
   id: uuid().primaryKey().defaultRandom(),
@@ -17,23 +18,71 @@ export const posts = pgTable("posts", {
     .references(() => user.id, { onDelete: "cascade" }),
   title: varchar({ length: 500 }).notNull(),
   content: text().notNull(),
-  tags: text("tags").array().default(sql`ARRAY[]::text[]`),
-  viewsCount: integer().default(0),
-  commentsCount: integer().default(0),
+  tags: text("tags").array().notNull().default(sql`ARRAY[]::text[]`),
+  viewsCount: integer().notNull().default(0),
+  commentsCount: integer().notNull().default(0),
   imageUrl: text("image_url"),
-  createdAt: timestamp({ withTimezone: true }).defaultNow(),
-  updatedAt: timestamp({ withTimezone: true }).defaultNow().$onUpdate(() =>
-    new Date()
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(
+    () => new Date(),
   ),
 });
 
-export const selectPostsSchema = createSelectSchema(posts);
+export const selectPostsSchema = createSelectSchema(posts, {
+  id: (schema) => schema.describe("The unique identifier of the post"),
+  userId: (schema) =>
+    schema.describe("The unique identifier of the user who shared the post")
+      .openapi({ example: "kQ2IvXmUtRXaHoUEQYnoh1mOf821XiOt" }),
+  title: (schema) =>
+    schema.describe("The title of the post").openapi({
+      example: "Importance of documentation",
+    }),
+  content: (schema) =>
+    schema.min(0).describe("The content of the post").openapi({
+      example: "Learn how to properly document APIs...",
+    }),
+  tags: (schema) =>
+    schema.describe("The tags of the post").openapi({
+      example: ["documentation", "API", "TypeScript"],
+    }),
+  viewsCount: (schema) =>
+    schema.min(0).max(9999).describe("The number of views under the post")
+      .openapi({
+        example: 0,
+      }),
+  commentsCount: (schema) =>
+    schema.min(0).max(9999).describe("The number of comments under the post")
+      .openapi({
+        example: 0,
+      }),
+  imageUrl: (schema) =>
+    schema.describe("The URL for the image in the post").openapi({
+      example:
+        "https://www.blog.com/api/images/f72cd425-476f-4599-bc8a-88135018905f",
+    }),
+  createdAt: z.iso.datetime().describe(
+    "The date and time of the creation of the post",
+  ),
+  updatedAt: z.iso.datetime().describe(
+    "The date and time of the latest updates of the post",
+  ),
+});
 
 export const insertPostsSchema = createInsertSchema(posts, {
   title: (schema) =>
-    schema.min(5, "Title must be at least 5 characters long").max(500),
+    schema.min(3, "Title must be at least 3 characters long").max(
+      500,
+      "The title is too long",
+    ).describe("The title of the post").openapi({ example: "Hello blog!" }),
   content: (schema) =>
-    schema.min(10, "Content must be at least 10 characters long"),
+    schema.min(10, "Content must be at least 10 characters long").describe(
+      "The content of the post",
+    ).openapi({ example: "This is my first post" }),
+  imageUrl: (schema) => schema.describe("The URL for the image in the post"),
+  tags: (schema) =>
+    schema.describe("The tags of the post").openapi({
+      example: ["blog", "post"],
+    }),
 }).omit({
   id: true,
   userId: true,

@@ -25,6 +25,7 @@ beforeAll(async () => {
 
   for (const post of initialPosts) {
     await client.api.posts.$post({
+      //@ts-expect-error: all good
       json: post,
     }, { headers: { Cookie: cookie } });
   }
@@ -113,7 +114,7 @@ describe("PATCH request to", () => {
 
       expect(Object.keys(json.errors[0])[0]).toBe("title");
       expect(Object.values(json.errors[0])[0]).toBe(
-        "Title must be at least 5 characters long",
+        "Title must be at least 3 characters long",
       );
     }
   });
@@ -231,6 +232,7 @@ describe("POST request to", () => {
 
   it("/api/posts returns Unauthorized when not authorized", async () => {
     const response = await client.api.posts.$post({
+      //@ts-expect-error: all good
       json: {
         title: "New Test Post",
         content: "New Content",
@@ -247,6 +249,7 @@ describe("POST request to", () => {
 
   it("/api/posts creates a post when authorized", async () => {
     const response = await client.api.posts.$post({
+      //@ts-expect-error: all good
       json: {
         title: "New Test Post",
         content: "New Content",

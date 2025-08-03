@@ -1,7 +1,7 @@
 import { db } from "./db.ts";
 import { NewPost, PostUpdate } from "../types.ts";
 import { posts } from "./schema.ts";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
 export const getAllPosts = async () => {
   const returnedPosts = await db
@@ -19,6 +19,8 @@ export const addPost = async (post: NewPost) => {
 };
 
 export const getOnePost = async (id: typeof posts.$inferSelect.id) => {
+  await db.update(posts).set({ viewsCount: sql`${posts.viewsCount} + 1` })
+    .where(eq(posts.id, id));
   const post = await db.query.posts.findFirst({
     where: eq(posts.id, id),
   });
