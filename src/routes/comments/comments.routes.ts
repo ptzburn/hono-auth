@@ -6,6 +6,7 @@ import createErrorSchema from "../../utils/openapi/create-error-schema.ts";
 import { authMiddleware } from "../../middlewares/auth.middleware.ts";
 import unauthorizedErrorSchema from "../../utils/openapi/unauthorized-schema.ts";
 import IdParamsSchema from "../../utils/openapi/id-params-schema.ts";
+import forbiddenErrorSchema from "../../utils/openapi/forbidden-schema.ts";
 
 export const get = createRoute({
   tags: ["Comments"],
@@ -53,6 +54,12 @@ export const create = createRoute({
       "Validation error(s)",
     ),
     401: jsonContent(unauthorizedErrorSchema, "Unauthorized"),
+    404: jsonContent(
+      z.object({ success: z.boolean(), message: z.string() }).openapi({
+        example: { success: false, message: "Not Found" },
+      }),
+      "Comment not found",
+    ),
   },
 });
 
@@ -103,6 +110,7 @@ export const remove = createRoute({
       "Invalid id error",
     ),
     401: jsonContent(unauthorizedErrorSchema, "Unauthorized"),
+    403: jsonContent(forbiddenErrorSchema, "Forbidden"),
     404: jsonContent(
       z.object({ success: z.boolean(), message: z.string() }).openapi({
         example: { success: false, message: "Not Found" },

@@ -24,7 +24,17 @@ export const create: RouteHandler<CreateRoute> = async (c) => {
     postId: id,
   });
 
-  return c.json(newComment, 201);
+  if (newComment.statusCode === 404) {
+    return c.json(
+      {
+        success: false,
+        message: "The post you tried to comment was not found",
+      },
+      newComment.statusCode,
+    );
+  }
+
+  return c.json(newComment.data, 201);
 };
 
 export const remove: RouteHandler<DeleteRoute> = async (c) => {
@@ -33,8 +43,18 @@ export const remove: RouteHandler<DeleteRoute> = async (c) => {
 
   const result = await deleteComment(id, user.id);
 
-  if (result.length === 0) {
-    return c.json({ success: false, message: "Not Found" }, 404);
+  if (result.statusCode === 404) {
+    return c.json(
+      { success: false, message: "The comment was not found" },
+      result.statusCode,
+    );
+  }
+
+  if (result.statusCode === 403) {
+    return c.json({
+      success: false,
+      message: "You are not authorized to delete this comment",
+    }, result.statusCode);
   }
 
   return c.body(null, 204);

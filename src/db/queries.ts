@@ -94,9 +94,18 @@ export const getComments = async (postId: typeof posts.$inferSelect.id) => {
 export const addComment = async (
   comment: NewComment,
 ) => {
+  const postToComment = await db.query.posts.findFirst({
+    where: eq(posts.id, comment.postId),
+    columns: { id: true },
+  });
+
+  if (!postToComment) {
+    return { statusCode: 404 };
+  }
+
   const [result] = await db.insert(comments).values(comment).returning();
 
-  return result;
+  return { statusCode: 201, data: result };
 };
 
 export const deleteComment = async (
@@ -110,5 +119,17 @@ export const deleteComment = async (
     ),
   ).returning();
 
-  return result;
+  if (result.length === 0) {
+    const comment = await db.query.comments.findFirst({
+      where: eq(comments.id, id),
+    });
+
+    if (!comment) {
+      return { statusCode: 404 };
+    }
+
+    return { statusCode: 403 };
+  }
+
+  return { statuCode: 204 };
 };

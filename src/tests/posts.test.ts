@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 
 import posts from "../routes/posts/posts.main.ts";
-import { posts as dbPosts, user } from "../db/schema.ts";
+import { user } from "../db/schema.ts";
 import createApp from "../lib/create-app.ts";
 import env from "../env.ts";
 import { db } from "../db/db.ts";
@@ -34,7 +34,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await db.delete(dbPosts);
   await db.delete(user);
 });
 

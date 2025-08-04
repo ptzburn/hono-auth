@@ -27,7 +27,8 @@
     "db:migrate": "deno -A --node-modules-dir npm:drizzle-kit migrate",
     "db:studio": "deno -A --node-modules-dir npm:drizzle-kit studio",
     "deploy": "deployctl deploy --project=ptzburn-blog-api --entrypoint=src/app.ts",
-    "test": "deno test --allow-read --allow-write --allow-run --allow-net --allow-sys --allow-env --env-file=.env.test src/tests/posts.test.ts",
+    "test:posts": "deno test --allow-read --allow-write --allow-run --allow-net --allow-sys --allow-env --env-file=.env.test src/tests/posts.test.ts",
+    "test:comments": "deno test --allow-read --allow-write --allow-run --allow-net --allow-sys --allow-env --env-file=.env.test src/tests/comments.test.ts",
     "db:push:test": "deno run --allow-net --node-modules-dir --allow-env --allow-read --allow-sys --allow-write --allow-run --env-file=.env.test npm:drizzle-kit push"
   },
   "lint": {

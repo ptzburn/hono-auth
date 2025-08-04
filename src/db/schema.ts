@@ -135,7 +135,7 @@ export const insertCommentsSchema = createInsertSchema(comments, {
   content: (schema) =>
     schema.min(1, "Comment must be at least 1 character long").describe(
       "A comment under the post",
-    ).max(500, "Comment is too long. Maximum length is 500 ").openapi({
+    ).max(500, "Comment is too long. Maximum length is 500").openapi({
       example: "I like it!",
     }),
 }).omit({
