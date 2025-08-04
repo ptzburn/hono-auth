@@ -7,6 +7,7 @@ import { auth } from "./auth.ts";
 import notFound from "../middlewares/notFound.middleware.ts";
 import onError from "../middlewares/onError.middleware.ts";
 import defaultHook from "../utils/openapi/default-hook.ts";
+import env from "../env.ts";
 
 export function createRouter() {
   return new OpenAPIHono({
@@ -18,9 +19,12 @@ export function createRouter() {
 export default function createApp() {
   const app = createRouter();
 
+  if (env.ENV !== "test") {
+    app.use(logger());
+  }
+
   app
     .use(poweredBy())
-    .use(logger())
     .use(
       "/api/auth/*",
       cors({
