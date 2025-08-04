@@ -1,12 +1,16 @@
 import { db } from "../../db/db.ts";
 import { auth } from "../../lib/auth.ts";
 
-export async function signUpAndGetCookie() {
+export async function signUpAndGetCookie(
+  name: string,
+  email: string,
+  password: string,
+) {
   const signUpResponse = await auth.api.signUpEmail({
     body: {
-      name: "tester",
-      email: "test@test.com",
-      password: "password123",
+      name: name,
+      email: email,
+      password: password,
     },
     asResponse: true,
   });
@@ -14,11 +18,11 @@ export async function signUpAndGetCookie() {
   return signUpResponse.headers.get("set-cookie") || "oops";
 }
 
-export async function getCookie() {
+export async function signInAndGetCookie(email: string, password: string) {
   const signInResponse = await auth.api.signInEmail({
     body: {
-      email: "test@test.com",
-      password: "password123",
+      email: email,
+      password: password,
     },
     asResponse: true,
   });

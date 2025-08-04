@@ -3,7 +3,6 @@ import {
   boolean,
   integer,
   pgTable,
-  primaryKey,
   text,
   timestamp,
   uuid,
@@ -106,6 +105,7 @@ export const updatePostsSchema = insertPostsSchema.partial();
 export const comments = pgTable(
   "comments",
   {
+    id: uuid().primaryKey().defaultRandom(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -120,12 +120,16 @@ export const comments = pgTable(
         () => new Date(),
       ),
   },
-  (
-    table,
-  ) => [primaryKey({ columns: [table.userId, table.postId, table.createdAt] })],
 );
 
-export const selectCommentsSchema = createSelectSchema(comments);
+export const selectCommentsSchema = createSelectSchema(comments, {
+  createdAt: z.iso.datetime().describe(
+    "The date and time of the creation of the comment",
+  ),
+  updatedAt: z.iso.datetime().describe(
+    "The date and time of the latest updates of the comment",
+  ),
+});
 
 export const insertCommentsSchema = createInsertSchema(comments, {
   content: (schema) =>
@@ -135,6 +139,7 @@ export const insertCommentsSchema = createInsertSchema(comments, {
       example: "I like it!",
     }),
 }).omit({
+  id: true,
   postId: true,
   userId: true,
   likes: true,

@@ -1,18 +1,17 @@
 import { RouteHandler } from "@hono/zod-openapi";
-import { CreateRoute } from "./comments.routes.ts";
-import {
-  addComment,
-  deletePost,
-  getAllPosts,
-  getOnePost,
-  postsWithTag,
-  updatePost,
-} from "../../db/queries.ts";
+import { CreateRoute, DeleteRoute, GetRoute } from "./comments.routes.ts";
+import { addComment, deleteComment, getComments } from "../../db/queries.ts";
 
-/*export const allPosts: RouteHandler<PostsRoute> = async (c) => {
-  const allPosts = await getAllPosts();
-  return c.json(allPosts);
-};*/
+export const get: RouteHandler<GetRoute> = async (c) => {
+  const { id } = c.req.valid("param");
+  const comments = await getComments(id);
+
+  if (comments.length === 0) {
+    return c.json({ success: false, message: "Not Found" }, 404);
+  }
+
+  return c.json(comments, 200);
+};
 
 export const create: RouteHandler<CreateRoute> = async (c) => {
   const { id } = c.req.valid("param");
@@ -28,63 +27,15 @@ export const create: RouteHandler<CreateRoute> = async (c) => {
   return c.json(newComment, 201);
 };
 
-/*export const getOne: RouteHandler<GetOneRoute> = async (c) => {
-  const { id } = c.req.valid("param");
-  const post = await getOnePost(id);
-
-  if (!post) {
-    return c.json({ success: false, message: "Not Found" }, 404);
-  }
-
-  return c.json(post, 200);
-};
-
-export const getByTag: RouteHandler<GetByTag> = async (c) => {
-  const { tagName } = c.req.valid("param");
-  const taggedPosts = await postsWithTag(tagName);
-
-  if (taggedPosts.length === 0) {
-    return c.json({ success: false, message: "Not Found" }, 404);
-  }
-
-  return c.json(taggedPosts, 200);
-};
-
-export const update: RouteHandler<UpdateRoute> = async (c) => {
-  const { id } = c.req.valid("param");
-  const updates = c.req.valid("json");
-
-  if (Object.keys(updates).length === 0) {
-    return c.json(
-      {
-        success: false,
-        errors: [
-          {
-            message: "No updates provided",
-          },
-        ],
-      },
-      422,
-    );
-  }
-
-  const updatedPost = await updatePost(updates, id);
-
-  if (!updatedPost) {
-    return c.json({ success: false, message: "Not Found" }, 404);
-  }
-
-  return c.json(updatedPost, 200);
-};
-
 export const remove: RouteHandler<DeleteRoute> = async (c) => {
   const { id } = c.req.valid("param");
+  const user = c.get("user");
 
-  const result = await deletePost(id);
+  const result = await deleteComment(id, user.id);
 
   if (result.length === 0) {
     return c.json({ success: false, message: "Not Found" }, 404);
   }
 
   return c.body(null, 204);
-};*/
+};

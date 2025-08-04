@@ -9,7 +9,7 @@ const app = createApp();
 const routes = [
   main,
   posts,
-  //comments,
+  comments,
 ];
 
 configureOpenApi(app);

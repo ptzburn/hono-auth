@@ -1,5 +1,4 @@
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import jsonContent from "../../utils/openapi/json-content.ts";
 import { insertCommentsSchema, selectCommentsSchema } from "../../db/schema.ts";
 import jsonContentRequired from "../../utils/openapi/json-content-required.ts";
@@ -7,7 +6,31 @@ import createErrorSchema from "../../utils/openapi/create-error-schema.ts";
 import { authMiddleware } from "../../middlewares/auth.middleware.ts";
 import unauthorizedErrorSchema from "../../utils/openapi/unauthorized-schema.ts";
 import IdParamsSchema from "../../utils/openapi/id-params-schema.ts";
-import TagParamsSchema from "../../utils/openapi/tag-params-schema.ts";
+
+export const get = createRoute({
+  tags: ["Comments"],
+  method: "get",
+  path: "/posts/{id}/comments",
+  request: {
+    params: IdParamsSchema,
+  },
+  responses: {
+    200: jsonContent(
+      z.array(selectCommentsSchema),
+      "Requested comments",
+    ),
+    422: jsonContent(
+      createErrorSchema(insertCommentsSchema),
+      "Invalid id error",
+    ),
+    404: jsonContent(
+      z.object({ success: z.boolean(), message: z.string() }).openapi({
+        example: { success: false, message: "Not Found" },
+      }),
+      "No comments were found",
+    ),
+  },
+});
 
 export const create = createRoute({
   tags: ["Comments"],
@@ -33,53 +56,7 @@ export const create = createRoute({
   },
 });
 
-/*export const getOne = createRoute({
-  tags: ["Posts"],
-  method: "get",
-  path: "/posts/{id}",
-  request: {
-    params: IdParamsSchema,
-  },
-  responses: {
-    200: jsonContent(
-      selectPostsSchema,
-      "Requested post",
-    ),
-    422: jsonContent(
-      createErrorSchema(insertPostsSchema),
-      "Invalid id error",
-    ),
-    404: jsonContent(
-      z.object({ success: z.boolean(), message: z.string() }).openapi({
-        example: { success: false, message: "Not Found" },
-      }),
-      "Post not found",
-    ),
-  },
-});
-
-export const getByTag = createRoute({
-  tags: ["Posts"],
-  method: "get",
-  path: "/posts/tags/{tagName}",
-  request: {
-    params: TagParamsSchema,
-  },
-  responses: {
-    200: jsonContent(
-      z.array(selectPostsSchema),
-      "List of all posts tagged with the selected tag",
-    ),
-    404: jsonContent(
-      z.object({ success: z.boolean(), message: z.string() }).openapi({
-        example: { success: false, message: "Not Found" },
-      }),
-      "Post not found",
-    ),
-  },
-});
-
-export const update = createRoute({
+/*export const update = createRoute({
   tags: ["Posts"],
   method: "patch",
   path: "/posts/{id}",
@@ -107,19 +84,19 @@ export const update = createRoute({
       "Post not found",
     ),
   },
-});
+});*/
 
 export const remove = createRoute({
-  tags: ["Posts"],
+  tags: ["Comments"],
   method: "delete",
-  path: "/posts/{id}",
+  path: "/comments/{id}",
   request: {
     params: IdParamsSchema,
   },
   middleware: [authMiddleware] as const,
   responses: {
     204: {
-      description: "Post deleted",
+      description: "Comment deleted",
     },
     422: jsonContent(
       createErrorSchema(IdParamsSchema),
@@ -130,14 +107,12 @@ export const remove = createRoute({
       z.object({ success: z.boolean(), message: z.string() }).openapi({
         example: { success: false, message: "Not Found" },
       }),
-      "Post not found",
+      "Comment not found",
     ),
   },
-});*/
+});
 
-//export type GetRoute = typeof get;
+export type GetRoute = typeof get;
 export type CreateRoute = typeof create;
-/*export type GetOneRoute = typeof getOne;
-export type GetByTag = typeof getByTag;
-export type UpdateRoute = typeof update;
-export type DeleteRoute = typeof remove;*/
+//export type UpdateRoute = typeof update;
+export type DeleteRoute = typeof remove;

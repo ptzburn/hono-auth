@@ -6,7 +6,7 @@ const IdParamsSchema = z.object({
       name: "id",
       in: "path",
     },
-    example: "e6abd3e5-fcce-4808-ab86-56844395f5b9",
+    example: crypto.randomUUID(),
   }),
 });
 

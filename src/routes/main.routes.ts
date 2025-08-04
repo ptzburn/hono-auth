@@ -1,6 +1,5 @@
 import { createRouter } from "../lib/create-app.ts";
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import jsonContent from "../utils/openapi/json-content.ts";
 
 const router = createRouter()

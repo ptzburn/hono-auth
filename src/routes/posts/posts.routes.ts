@@ -1,5 +1,4 @@
-import { createRoute } from "@hono/zod-openapi";
-import { z } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import jsonContent from "../../utils/openapi/json-content.ts";
 import {
   insertPostsSchema,
@@ -12,6 +11,7 @@ import { authMiddleware } from "../../middlewares/auth.middleware.ts";
 import unauthorizedErrorSchema from "../../utils/openapi/unauthorized-schema.ts";
 import IdParamsSchema from "../../utils/openapi/id-params-schema.ts";
 import TagParamsSchema from "../../utils/openapi/tag-params-schema.ts";
+import forbiddenErrorSchema from "../../utils/openapi/forbidden-schema.ts";
 
 export const getAllPosts = createRoute({
   tags: ["Posts"],
@@ -74,7 +74,7 @@ export const getOne = createRoute({
 export const getByTag = createRoute({
   tags: ["Posts"],
   method: "get",
-  path: "/posts/tags/{tagName}",
+  path: "/tags/{tagName}",
   request: {
     params: TagParamsSchema,
   },
@@ -113,6 +113,7 @@ export const update = createRoute({
       "Validation error(s)",
     ),
     401: jsonContent(unauthorizedErrorSchema, "Unauthorized"),
+    403: jsonContent(forbiddenErrorSchema, "Forbidden"),
     404: jsonContent(
       z.object({ success: z.boolean(), message: z.string() }).openapi({
         example: { success: false, message: "Not Found" },
@@ -139,6 +140,7 @@ export const remove = createRoute({
       "Invalid id error",
     ),
     401: jsonContent(unauthorizedErrorSchema, "Unauthorized"),
+    403: jsonContent(forbiddenErrorSchema, "Forbidden"),
     404: jsonContent(
       z.object({ success: z.boolean(), message: z.string() }).openapi({
         example: { success: false, message: "Not Found" },
