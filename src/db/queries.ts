@@ -108,6 +108,30 @@ export const addComment = async (
   return { statusCode: 201, data: result };
 };
 
+export const updateComment = async (
+  updates: { content: string },
+  id: typeof comments.$inferSelect.id,
+  userId: typeof comments.$inferSelect.userId,
+) => {
+  const [result] = await db.update(comments).set(updates).where(
+    and(eq(comments.id, id), eq(comments.userId, userId)),
+  ).returning();
+
+  if (!result) {
+    const comment = await db.query.comments.findFirst({
+      where: eq(comments.id, id),
+    });
+
+    if (!comment) {
+      return { statusCode: 404 };
+    }
+
+    return { statusCode: 403 };
+  }
+
+  return { statusCode: 200, data: result };
+};
+
 export const deleteComment = async (
   id: typeof comments.$inferSelect.id,
   userId: typeof comments.$inferSelect.userId,

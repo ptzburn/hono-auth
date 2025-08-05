@@ -5,7 +5,7 @@ import type { z } from "@hono/zod-openapi";
 
 export type Post = InferSelectModel<typeof posts>;
 export type NewPost = InferInsertModel<typeof posts>;
-export type PostUpdate = Partial<InferSelectModel<typeof posts>>;
+export type PostUpdate = Partial<NewPost>;
 
 export type NewComment = InferInsertModel<typeof comments>;
 

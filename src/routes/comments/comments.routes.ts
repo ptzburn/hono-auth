@@ -63,35 +63,36 @@ export const create = createRoute({
   },
 });
 
-/*export const update = createRoute({
-  tags: ["Posts"],
+export const update = createRoute({
+  tags: ["Comments"],
   method: "patch",
-  path: "/posts/{id}",
+  path: "/comments/{id}",
   request: {
     params: IdParamsSchema,
-    body: jsonContentRequired(updatePostsSchema, "Post to update"),
+    body: jsonContentRequired(insertCommentsSchema, "Comment to update"),
   },
   middleware: [authMiddleware] as const,
   responses: {
     200: jsonContent(
-      selectPostsSchema,
-      "Updated post",
+      selectCommentsSchema,
+      "Updated comment",
     ),
     422: jsonContent(
-      createErrorSchema(insertPostsSchema).or(
+      createErrorSchema(insertCommentsSchema).or(
         createErrorSchema(IdParamsSchema),
       ),
       "Validation error(s)",
     ),
     401: jsonContent(unauthorizedErrorSchema, "Unauthorized"),
+    403: jsonContent(forbiddenErrorSchema, "Forbidden"),
     404: jsonContent(
       z.object({ success: z.boolean(), message: z.string() }).openapi({
         example: { success: false, message: "Not Found" },
       }),
-      "Post not found",
+      "Comment not found",
     ),
   },
-});*/
+});
 
 export const remove = createRoute({
   tags: ["Comments"],
@@ -122,5 +123,5 @@ export const remove = createRoute({
 
 export type GetRoute = typeof get;
 export type CreateRoute = typeof create;
-//export type UpdateRoute = typeof update;
+export type UpdateRoute = typeof update;
 export type DeleteRoute = typeof remove;
