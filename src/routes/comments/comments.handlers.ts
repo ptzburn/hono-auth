@@ -1,6 +1,16 @@
 import { RouteHandler } from "@hono/zod-openapi";
-import { CreateRoute, DeleteRoute, GetRoute } from "./comments.routes.ts";
-import { addComment, deleteComment, getComments } from "../../db/queries.ts";
+import {
+  CreateRoute,
+  DeleteRoute,
+  GetRoute,
+  UpdateRoute,
+} from "./comments.routes.ts";
+import {
+  addComment,
+  deleteComment,
+  getComments,
+  updateComment,
+} from "../../db/queries.ts";
 
 export const get: RouteHandler<GetRoute> = async (c) => {
   const { id } = c.req.valid("param");
@@ -35,6 +45,30 @@ export const create: RouteHandler<CreateRoute> = async (c) => {
   }
 
   return c.json(newComment.data, 201);
+};
+
+export const update: RouteHandler<UpdateRoute> = async (c) => {
+  const { id } = c.req.valid("param");
+  const updates = c.req.valid("json");
+  const user = c.get("user");
+
+  const result = await updateComment(updates, id, user.id);
+
+  if (result.statusCode === 404) {
+    return c.json(
+      { success: false, message: "Comment not found" },
+      result.statusCode,
+    );
+  }
+
+  if (result.statusCode === 403) {
+    return c.json({
+      success: false,
+      message: "You are not authorized to edit this comment",
+    }, result.statusCode);
+  }
+
+  return c.json(result.data, 200);
 };
 
 export const remove: RouteHandler<DeleteRoute> = async (c) => {
