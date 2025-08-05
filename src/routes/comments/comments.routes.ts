@@ -28,7 +28,7 @@ export const get = createRoute({
       z.object({ success: z.boolean(), message: z.string() }).openapi({
         example: { success: false, message: "Not Found" },
       }),
-      "No comments were found",
+      "The post was not found",
     ),
   },
 });

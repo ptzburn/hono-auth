@@ -123,6 +123,23 @@ export const comments = pgTable(
 );
 
 export const selectCommentsSchema = createSelectSchema(comments, {
+  likes: (schema) =>
+    schema.min(0).max(9999).describe("The amount of likes under this comment"),
+  content: (schema) =>
+    schema.describe("The content of the comment, i.e. the comment itself")
+      .openapi({ example: "Awesome 👍" }),
+  id: (schema) =>
+    schema.describe("The unique identifier of the comment").openapi({
+      example: crypto.randomUUID(),
+    }),
+  userId: (schema) =>
+    schema.describe("The unique identifier of the comment creator").openapi({
+      example: "gQ2IvXmUtRXaHoUEQYnoh1mOf821XiOt",
+    }),
+  postId: (schema) =>
+    schema.describe(
+      "The unique identifier of the post to which the comment relates",
+    ),
   createdAt: z.iso.datetime().describe(
     "The date and time of the creation of the comment",
   ),

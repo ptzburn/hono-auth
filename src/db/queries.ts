@@ -88,7 +88,18 @@ export const getComments = async (postId: typeof posts.$inferSelect.id) => {
     desc(comments.createdAt),
   );
 
-  return fetchedComments;
+  if (fetchedComments.length === 0) {
+    const postWithComments = await db.query.posts.findFirst({
+      where: eq(posts.id, postId),
+      columns: { id: true },
+    });
+
+    if (!postWithComments) {
+      return { statusCode: 404 };
+    }
+  }
+
+  return { statusCode: 200, data: fetchedComments };
 };
 
 export const addComment = async (
