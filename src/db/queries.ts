@@ -1,7 +1,7 @@
 import { db } from "./db.ts";
 import { NewComment, NewPost, PostUpdate } from "../types.ts";
-import { comments, posts } from "./schema.ts";
-import { and, arrayContains, desc, eq, sql } from "drizzle-orm";
+import { commentLikes, comments, postLikes, posts } from "./schema.ts";
+import { and, arrayContains, count, desc, eq, sql } from "drizzle-orm";
 
 export const getAllPosts = async () => {
   const returnedPosts = await db
@@ -166,5 +166,76 @@ export const deleteComment = async (
     return { statusCode: 403 };
   }
 
-  return { statuCode: 204 };
+  return { statusCode: 204 };
+};
+
+export const getLikesNumber = async (
+  tableName: string,
+  id: typeof posts.$inferSelect.id,
+) => {
+  const tables = tableName === "postLikes"
+    ? [postLikes, posts]
+    : [commentLikes, comments];
+  const properties = tableName === "postLikes"
+    ? [postLikes.postId, posts.id]
+    : [commentLikes.commentId, comments.id];
+
+  const [likesNumber] = await db.select({ count: count() }).from(tables[0])
+    .where(
+      eq(properties[0], id),
+    );
+
+  if (likesNumber.count === 0) {
+    const postOrComment = await db.select().from(
+      tables[1],
+    ).where(
+      eq(properties[1], id),
+    );
+
+    if (postOrComment.length === 0) {
+      return { statusCode: 404, likes: 0 };
+    }
+  }
+
+  return { statusCode: 200, likes: likesNumber.count };
+};
+
+export const likeUnlike = async (
+  tableName: string,
+  userId: typeof postLikes.$inferSelect.userId,
+  id: typeof postLikes.$inferSelect.postId,
+) => {
+  const tables = tableName === "postLikes"
+    ? [posts, postLikes]
+    : [comments, commentLikes];
+  const properties = tableName === "postLikes"
+    ? [posts.id, postLikes.postId, postLikes.userId]
+    : [comments.id, commentLikes.commentId, commentLikes.userId];
+
+  const [postOrComment] = await db.select().from(tables[0]).where(
+    eq(properties[0], id),
+  );
+
+  if (!postOrComment) {
+    return { statusCode: 404 };
+  }
+
+  const [existingLike] = await db.select().from(tables[1]).where(
+    and(eq(properties[1], id), eq(properties[2], userId)),
+  );
+
+  if (existingLike) {
+    await db.delete(tables[1]).where(
+      and(eq(properties[1], id), eq(properties[2], userId)),
+    );
+    return { statusCode: 204 };
+  }
+
+  const json = tableName === "postLikes"
+    ? { userId, postId: id }
+    : { userId, commentId: id };
+
+  await db.insert(tables[1]).values(json);
+
+  return { statusCode: 201 };
 };

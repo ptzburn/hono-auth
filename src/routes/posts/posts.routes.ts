@@ -14,6 +14,8 @@ import TagParamsSchema from "../../utils/openapi/tag-params-schema.ts";
 import forbiddenErrorSchema from "../../utils/openapi/forbidden-schema.ts";
 
 export const getAllPosts = createRoute({
+  summary: "returns an array with the posts",
+  description: "Get all posts in an array",
   tags: ["Posts"],
   method: "get",
   path: "/posts",
@@ -26,6 +28,8 @@ export const getAllPosts = createRoute({
 });
 
 export const create = createRoute({
+  summary: "publishes the post",
+  description: "Publish the post",
   tags: ["Posts"],
   method: "post",
   path: "/posts",
@@ -47,6 +51,8 @@ export const create = createRoute({
 });
 
 export const getOne = createRoute({
+  summary: "returns the selected post",
+  description: "Get the selected post",
   tags: ["Posts"],
   method: "get",
   path: "/posts/{id}",
@@ -72,6 +78,8 @@ export const getOne = createRoute({
 });
 
 export const getByTag = createRoute({
+  summary: "returns an array with posts with the tag",
+  description: "Get an array with posts that include the selected tag",
   tags: ["Posts"],
   method: "get",
   path: "/tags/{tagName}",
@@ -93,6 +101,8 @@ export const getByTag = createRoute({
 });
 
 export const update = createRoute({
+  summary: "edits the selected post",
+  description: "Edit the selected post",
   tags: ["Posts"],
   method: "patch",
   path: "/posts/{id}",
@@ -124,6 +134,8 @@ export const update = createRoute({
 });
 
 export const remove = createRoute({
+  summary: "deletes the selected post",
+  description: "Delete the selected post",
   tags: ["Posts"],
   method: "delete",
   path: "/posts/{id}",

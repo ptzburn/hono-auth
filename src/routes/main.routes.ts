@@ -5,6 +5,8 @@ import jsonContent from "../utils/openapi/json-content.ts";
 const router = createRouter()
   .openapi(
     createRoute({
+      summary: "returns OK if the server is up and running",
+      description: "Check the state of the server",
       tags: ["Main"],
       method: "get",
       path: "/health",
