@@ -3,6 +3,7 @@ import {
   boolean,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uuid,
@@ -19,9 +20,7 @@ export const posts = pgTable("posts", {
   title: varchar({ length: 500 }).notNull(),
   content: text().notNull(),
   tags: text("tags").array().notNull().default(sql`ARRAY[]::text[]`),
-  likes: integer().notNull().default(0),
   viewsCount: integer().notNull().default(0),
-  commentsCount: integer().notNull().default(0),
   imageUrl: text("image_url"),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(
@@ -46,19 +45,8 @@ export const selectPostsSchema = createSelectSchema(posts, {
     schema.describe("The tags of the post").openapi({
       example: ["documentation", "API", "TypeScript"],
     }),
-  likes: (schema) =>
-    schema.min(0).max(9999).describe("The amount of likes of the post").openapi(
-      {
-        example: 1,
-      },
-    ),
   viewsCount: (schema) =>
     schema.min(0).max(9999).describe("The number of views under the post")
-      .openapi({
-        example: 0,
-      }),
-  commentsCount: (schema) =>
-    schema.min(0).max(9999).describe("The number of comments under the post")
       .openapi({
         example: 0,
       }),
@@ -93,9 +81,7 @@ export const insertPostsSchema = createInsertSchema(posts, {
 }).omit({
   id: true,
   userId: true,
-  likes: true,
   viewsCount: true,
-  commentsCount: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -113,7 +99,6 @@ export const comments = pgTable(
       onDelete: "cascade",
     }),
     content: text().notNull(),
-    likes: integer().notNull().default(0),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow()
       .$onUpdate(
@@ -123,6 +108,21 @@ export const comments = pgTable(
 );
 
 export const selectCommentsSchema = createSelectSchema(comments, {
+  content: (schema) =>
+    schema.describe("The content of the comment, i.e. the comment itself")
+      .openapi({ example: "Awesome 👍" }),
+  id: (schema) =>
+    schema.describe("The unique identifier of the comment").openapi({
+      example: crypto.randomUUID(),
+    }),
+  userId: (schema) =>
+    schema.describe("The unique identifier of the comment creator").openapi({
+      example: "gQ2IvXmUtRXaHoUEQYnoh1mOf821XiOt",
+    }),
+  postId: (schema) =>
+    schema.describe(
+      "The unique identifier of the post to which the comment relates",
+    ),
   createdAt: z.iso.datetime().describe(
     "The date and time of the creation of the comment",
   ),
@@ -142,10 +142,41 @@ export const insertCommentsSchema = createInsertSchema(comments, {
   id: true,
   postId: true,
   userId: true,
-  likes: true,
   createdAt: true,
   updatedAt: true,
 });
+
+export const postLikes = pgTable(
+  "post_likes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    postId: uuid("post_id").notNull().references(() => posts.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.postId, table.userId] }),
+  ],
+);
+
+export const commentLikes = pgTable(
+  "comment_likes",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    commentId: uuid("comment_id").notNull().references(() => comments.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.commentId, table.userId] }),
+  ],
+);
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),

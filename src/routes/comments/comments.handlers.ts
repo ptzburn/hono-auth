@@ -16,11 +16,14 @@ export const get: RouteHandler<GetRoute> = async (c) => {
   const { id } = c.req.valid("param");
   const comments = await getComments(id);
 
-  if (comments.length === 0) {
-    return c.json({ success: false, message: "Not Found" }, 404);
+  if (comments.statusCode === 404) {
+    return c.json(
+      { success: false, message: "Post was not found" },
+      comments.statusCode,
+    );
   }
 
-  return c.json(comments, 200);
+  return c.json(comments.data, 200);
 };
 
 export const create: RouteHandler<CreateRoute> = async (c) => {

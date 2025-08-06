@@ -77,10 +77,10 @@ describe("GET request to", () => {
     }
   });
 
-  it("/api/posts/{id}/comments returns 404 Not Found if there are no comments under the post", async () => {
+  it("/api/posts/{id}/comments returns 404 Not Found if post was not found", async () => {
     const response = await commentsClient.api.posts[":id"].comments.$get({
       param: {
-        id: postsInDb[2].id,
+        id: crypto.randomUUID(),
       },
     });
     expect(response.status).toBe(404);
@@ -88,7 +88,7 @@ describe("GET request to", () => {
       const json = await response.json();
 
       expect(json.success).toBe(false);
-      expect(json.message).toBe("Not Found");
+      expect(json.message).toBe("Post was not found");
     }
   });
 

@@ -9,6 +9,8 @@ import IdParamsSchema from "../../utils/openapi/id-params-schema.ts";
 import forbiddenErrorSchema from "../../utils/openapi/forbidden-schema.ts";
 
 export const get = createRoute({
+  summary: "returns an array with the comments under the post",
+  description: "Get an array with all the comments under the post",
   tags: ["Comments"],
   method: "get",
   path: "/posts/{id}/comments",
@@ -28,12 +30,14 @@ export const get = createRoute({
       z.object({ success: z.boolean(), message: z.string() }).openapi({
         example: { success: false, message: "Not Found" },
       }),
-      "No comments were found",
+      "The post was not found",
     ),
   },
 });
 
 export const create = createRoute({
+  summary: "puts a comment under the post",
+  description: "Put a comment under the post",
   tags: ["Comments"],
   method: "post",
   path: "/posts/{id}/comments",
@@ -64,6 +68,8 @@ export const create = createRoute({
 });
 
 export const update = createRoute({
+  summary: "edits the comment",
+  description: "Edit the content of the comment",
   tags: ["Comments"],
   method: "patch",
   path: "/comments/{id}",
@@ -95,6 +101,8 @@ export const update = createRoute({
 });
 
 export const remove = createRoute({
+  summary: "deletes the comment",
+  description: "Delete the comment",
   tags: ["Comments"],
   method: "delete",
   path: "/comments/{id}",

@@ -30,6 +30,7 @@
     "test": "deno test --allow-read --allow-write --allow-run --allow-net --allow-sys --allow-env --env-file=.env.test",
     "test:posts": "deno test --allow-read --allow-write --allow-run --allow-net --allow-sys --allow-env --env-file=.env.test src/tests/posts.test.ts",
     "test:comments": "deno test --allow-read --allow-write --allow-run --allow-net --allow-sys --allow-env --env-file=.env.test src/tests/comments.test.ts",
+    "test:likes": "deno test --allow-read --allow-write --allow-run --allow-net --allow-sys --allow-env --env-file=.env.test src/tests/likes.test.ts",
     "db:push:test": "deno run --allow-net --node-modules-dir --allow-env --allow-read --allow-sys --allow-write --allow-run --env-file=.env.test npm:drizzle-kit push"
   },
   "lint": {
