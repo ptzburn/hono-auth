@@ -3,6 +3,7 @@ import jsonContent from "../../utils/openapi/json-content.ts";
 import { authMiddleware } from "../../middlewares/auth.middleware.ts";
 import unauthorizedErrorSchema from "../../utils/openapi/unauthorized-schema.ts";
 import IdParamsSchema from "../../utils/openapi/id-params-schema.ts";
+import createErrorSchema from "../../utils/openapi/create-error-schema.ts";
 
 export const getForPosts = createRoute({
   summary: "returns the likes number under the post",
@@ -23,6 +24,10 @@ export const getForPosts = createRoute({
         example: { success: false, message: "Not Found" },
       }),
       "Post not found",
+    ),
+    422: jsonContent(
+      createErrorSchema(z.object()),
+      "Invalid id error",
     ),
   },
 });
@@ -51,6 +56,10 @@ export const createForPosts = createRoute({
       }),
       "Post not found",
     ),
+    422: jsonContent(
+      createErrorSchema(z.object()),
+      "Invalid id error",
+    ),
   },
 });
 
@@ -73,6 +82,10 @@ export const getForComments = createRoute({
         example: { success: false, message: "Not Found" },
       }),
       "Comment not found",
+    ),
+    422: jsonContent(
+      createErrorSchema(z.object()),
+      "Invalid id error",
     ),
   },
 });
@@ -100,6 +113,10 @@ export const createForComments = createRoute({
         example: { success: false, message: "Not Found" },
       }),
       "Comment not found",
+    ),
+    422: jsonContent(
+      createErrorSchema(z.object()),
+      "Invalid id error",
     ),
   },
 });

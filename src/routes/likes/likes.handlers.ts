@@ -1,5 +1,10 @@
 import { RouteHandler } from "@hono/zod-openapi";
-import { CreatePostRoute, GetPostRoute } from "./likes.routes.ts";
+import {
+  CreateCommentRoute,
+  CreatePostRoute,
+  GetCommentRoute,
+  GetPostRoute,
+} from "./likes.routes.ts";
 import { getLikesNumber, likeUnlike } from "../../db/queries.ts";
 
 export const getForPosts: RouteHandler<GetPostRoute> = async (c) => {
@@ -37,7 +42,7 @@ export const createForPosts: RouteHandler<CreatePostRoute> = async (c) => {
   return c.body(null, 201);
 };
 
-export const getForComments: RouteHandler<GetPostRoute> = async (c) => {
+export const getForComments: RouteHandler<GetCommentRoute> = async (c) => {
   const { id } = c.req.valid("param");
 
   const { statusCode, likes } = await getLikesNumber("commentLikes", id);
@@ -52,7 +57,9 @@ export const getForComments: RouteHandler<GetPostRoute> = async (c) => {
   return c.json({ success: true, likes }, 200);
 };
 
-export const createForComments: RouteHandler<CreatePostRoute> = async (c) => {
+export const createForComments: RouteHandler<CreateCommentRoute> = async (
+  c,
+) => {
   const { id } = c.req.valid("param");
   const user = c.get("user");
 
